@@ -100,7 +100,7 @@ function showResults(){
     for(row = 0; row < temp.length; row++){
         result += "<tr>"
         for(j = 0; j < temp[row].laureates.length; j++){
-          if((temp[row].laureates[j].surname.toLowerCase()).indexOf(surname.toLowerCase()) >= 0){
+          if((temp[row].laureates[j].surname.toLowerCase()).indexOf(surname.toLowerCase()) >= 0 && temp[row].laureates[j].share == share){
             result += "<td>" + temp[row].year + "</td>"
             result += "<td>" + temp[row].category + "</td>"
             result += "<td>" + temp[row].laureates[j].firstname + " " + temp[row].laureates[j].surname + "</td>"
