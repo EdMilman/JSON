@@ -8,7 +8,7 @@ function getJSON(url) {
 function showResults(){
   var category = checkCategory(document.getElementById('category').value.toLowerCase())
   var year = formatYear(document.getElementById('year').value)
-  var share = formatShare(document.getElementById('share').value)
+  var share = formatShare(document.getElementById('share').value) || ">0"
   var surname = document.getElementById('surname').value
   var data = getJSON('nobel.json')
   var path = '.prizes'
@@ -16,7 +16,6 @@ function showResults(){
   if (category){
     path += '{..category == "' + category + '"'
   }
-
   if(year){
     if(!path.endsWith("s")){
       path += ' && '
@@ -93,22 +92,54 @@ function showResults(){
   } else{
     path += "."
   }
-    var temp = JSPath.apply(path, data)
+    var data = JSPath.apply(path, data)
     var header = "<table><tr><td><h3>Year</h3></td><td><h3>Category</h3></td><td><h3>Name</h3></td><td><h3>Share</h3></td></tr>"
     var end = "</table>"
     var result = header
-    for(row = 0; row < temp.length; row++){
+    if(!checkOperator(share)){
+    for(row = 0; row < data.length; row++){
         result += "<tr>"
-        for(j = 0; j < temp[row].laureates.length; j++){
-          if((temp[row].laureates[j].surname.toLowerCase()).indexOf(surname.toLowerCase()) >= 0 && temp[row].laureates[j].share == share){
-            result += "<td>" + temp[row].year + "</td>"
-            result += "<td>" + temp[row].category + "</td>"
-            result += "<td>" + temp[row].laureates[j].firstname + " " + temp[row].laureates[j].surname + "</td>"
-            result += "<td>" + temp[row].laureates[j].share + "</td>"
+        for(j = 0; j < data[row].laureates.length; j++){
+          if((data[row].laureates[j].surname.toLowerCase()).indexOf(surname.toLowerCase()) >= 0 && data[row].laureates[j].share == share){
+            result += "<td>" + data[row].year + "</td>"
+            result += "<td>" + data[row].category + "</td>"
+            result += "<td>" + data[row].laureates[j].firstname + " " + data[row].laureates[j].surname + "</td>"
+            result += "<td>" + data[row].laureates[j].share + "</td>"
             result += "</tr>"
-        }
+          }
         }
       }
+    }
+    else{
+      if(share.charAt(0) == "<"){
+        for(row = 0; row < data.length; row++){
+            result += "<tr>"
+            for(j = 0; j < data[row].laureates.length; j++){
+              if((data[row].laureates[j].surname.toLowerCase()).indexOf(surname.toLowerCase()) >= 0 && data[row].laureates[j].share < share.substring(1)){
+                result += "<td>" + data[row].year + "</td>"
+                result += "<td>" + data[row].category + "</td>"
+                result += "<td>" + data[row].laureates[j].firstname + " " + data[row].laureates[j].surname + "</td>"
+                result += "<td>" + data[row].laureates[j].share + "</td>"
+                result += "</tr>"
+            }
+          }
+        }
+      }
+      else{
+        for(row = 0; row < data.length; row++){
+            result += "<tr>"
+            for(j = 0; j < data[row].laureates.length; j++){
+              if((data[row].laureates[j].surname.toLowerCase()).indexOf(surname.toLowerCase()) >= 0 && data[row].laureates[j].share > share.substring(1)){
+                result += "<td>" + data[row].year + "</td>"
+                result += "<td>" + data[row].category + "</td>"
+                result += "<td>" + data[row].laureates[j].firstname + " " + data[row].laureates[j].surname + "</td>"
+                result += "<td>" + data[row].laureates[j].share + "</td>"
+                result += "</tr>"
+            }
+          }
+        }
+      }
+    }
     if(result.length > (header.length + end.length)){
       document.getElementById("resultArea").innerHTML = result + end
     } else{
@@ -153,7 +184,11 @@ function formatYear(year){
 
 function formatShare(share){
   if(checkOperator(share)){
-    if(checkShare(share.substring(1))) return ""
+    if(checkShare(share.substring(1))) {
+      return ""
+    } else{
+      return share
+    }
   }
   else {
     if(checkShare(share)) return ""
@@ -167,7 +202,6 @@ function checkCategory(category){
 }
 
 function reset(){
-  document.getElementById("resultArea").innerHTML = ""
   document.getElementById("category").value = ""
   document.getElementById("year").value = ""
   document.getElementById("surname").value = ""
